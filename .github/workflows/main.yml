@@ -152,22 +152,37 @@ jobs:
     needs: deploy
     if: ${{ always() && github.event.inputs.notify-team }}
     steps:
-      - uses: actions/checkout@v4
-      - name: Notify via GitHub Issue
-        uses: peter-evans/create-issue@v5
+      - name: Create GitHub Issue
+        uses: actions/github-script@v6
         with:
-          title: |
-            [CI/CD] Deployment ${{ github.event.inputs.environment || 'N/A' }} finished: ${{ job.status }}
-          body: |
-            Deployment Result  
-            Environment: ${{ github.event.inputs.environment || 'N/A' }}  
-            Version: ${{ github.event.inputs.version || 'N/A' }}  
-            Status: ${{ job.status }}  
-            Run URL: [Run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})  
-            This issue was created automatically by GitHub Actions.
-          labels: |
-            ci-cd
-            automated
+          script: |
+            const issueTitle = `[CI/CD] Deployment ${process.env.ENVIRONMENT || 'N/A'} finished: ${process.env.STATUS}`;
+            const issueBody = `
+              **Deployment Result**
+              - Environment: ${process.env.ENVIRONMENT || 'N/A'}
+              - Version: ${process.env.VERSION || 'N/A'}
+              - Status: ${process.env.STATUS}
+              - Run URL: [Run logs](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID})
+              This issue was created automatically by GitHub Actions.
+            `;
+            const labels = ['ci-cd', 'automated'];
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: issueTitle,
+              body: issueBody,
+              labels: labels
+            });
+        env:
+          ENVIRONMENT: ${{ github.event.inputs.environment }}
+          VERSION: ${{ github.event.inputs.version }}
+          STATUS: ${{ job.status }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+
+
 
 permissions:
   contents: read
