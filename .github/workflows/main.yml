@@ -127,7 +127,8 @@ jobs:
       - name: Notify Slack
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          payload: >
-            { "text": "Deployment finished for ${{ github.event.inputs.environment }} - status: ${{ needs.deploy.result }}" }
+          payload: |
+            { \"text\": \"Deployment finished for ${{ github.event.inputs.environment }} - status: ${{ needs.deploy.result }}\" }
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
