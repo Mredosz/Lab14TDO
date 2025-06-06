@@ -1,0 +1,37 @@
+name: "Custom Deploy"
+description: "Custom deployment action for staging/production"
+inputs:
+  environment:
+    description: "Target environment"
+    required: true
+  version:
+    description: "Version to deploy"
+    required: true
+  notify-team:
+    description: "Whether to notify the team"
+    required: false
+    default: "false"
+
+outputs:
+  deployment-url:
+    description: "URL of the deployed application"
+  deployment-time:
+    description: "Time of deployment"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Set up deploy script
+      shell: bash
+      run: chmod +x ${{ github.action_path }}/deploy.sh
+
+    - name: Run deploy script
+      id: deploy
+      shell: bash
+      run: |
+        OUTPUT=$(${{ github.action_path }}/deploy.sh "${{ inputs.environment }}" "${{ inputs.version }}" "${{ inputs.notify-team }}")
+        echo "$OUTPUT"
+        DEPLOY_URL=$(echo "$OUTPUT" | grep 'DEPLOYMENT_URL' | cut -d '=' -f2)
+        DEPLOY_TIME=$(echo "$OUTPUT" | grep 'DEPLOYMENT_TIME' | cut -d '=' -f2)
+        echo "deployment-url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+        echo "deployment-time=$DEPLOY_TIME" >> $GITHUB_OUTPUT
