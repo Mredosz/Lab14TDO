@@ -162,3 +162,7 @@ jobs:
           labels: |
             ci-cd
             automated
+
+permissions:
+  contents: read
+  issues: write
