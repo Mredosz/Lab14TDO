@@ -98,7 +98,9 @@ jobs:
       - run: rm -rf node_modules
       - run: npm ci
       - run: docker compose up -d
-      - run: npx wait-for-it localhost:3000 --timeout=30 --strict
+      - run: curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+      - run: chmod +x wait-for-it.sh
+      - run: ./wait-for-it.sh localhost:3000 --timeout=30 --strict
       - run: npm run integration-test
 
   build:
