@@ -97,6 +97,8 @@ jobs:
           node-version: 18
       - run: rm -rf node_modules
       - run: npm ci
+      - run: docker compose up -d
+      - run: npx wait-for-it localhost:3000 --timeout=30 --strict
       - run: npm run integration-test
 
   build:
