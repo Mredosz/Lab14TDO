@@ -152,6 +152,7 @@ jobs:
     needs: deploy
     if: always()
     steps:
+      - uses: actions/checkout@v4
       - name: Notify via GitHub Issue
         uses: peter-evans/create-issue-from-file@v5
         with:
