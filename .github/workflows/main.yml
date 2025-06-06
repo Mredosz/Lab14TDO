@@ -9,19 +9,18 @@ on:
     inputs:
       environment:
         type: choice
-        description: 'Deployment environment'
+        description: "Deployment environment"
         options:
           - staging
           - production
       version:
-        description: 'Version to deploy'
+        description: "Version to deploy"
         required: true
       notify-team:
         type: boolean
         default: false
 
 jobs:
-
   lint:
     runs-on: ubuntu-latest
     steps:

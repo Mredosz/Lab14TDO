@@ -14,7 +14,6 @@ export default [
         __dirname: "readonly",
       },
     },
-    rules: {
-    },
+    rules: {},
   },
 ];
