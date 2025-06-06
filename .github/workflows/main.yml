@@ -158,10 +158,13 @@ jobs:
         with:
           title: |
             [CI/CD] Deployment ${{ github.event.inputs.environment || 'N/A' }} finished: ${{ job.status }}
-          content-filepath: .github/notify-template.md
-          labels: |
-            ci-cd
-            automated
+          content: |
+            Deployment Result  
+            Environment: ${{ github.event.inputs.environment || 'N/A' }}  
+            Version: ${{ github.event.inputs.version || 'N/A' }}  
+            Status: ${{ job.status }}  
+            Run URL: [Run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})  
+            This issue was created automatically by GitHub Actions.
 
 permissions:
   contents: read
