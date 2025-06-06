@@ -7,7 +7,6 @@
     "format:check": "prettier --check .",
     "test": "jest --coverage --testPathIgnorePatterns=integration-test.js",
     "integration-test": "jest integration-test.js",
-    "build": "webpack --config webpack.config.js",
     "dev": "node src/index.js"
   },
   "dependencies": {
