@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   reporters: [
     "default",
     [
@@ -9,4 +9,5 @@ module.exports = {
       },
     ],
   ],
+  testMatch: ["**/integration-test.js"],
 };
