@@ -1,0 +1,137 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        description: 'Deployment environment'
+        options:
+          - staging
+          - production
+      version:
+        description: 'Version to deploy'
+        required: true
+      notify-team:
+        type: boolean
+        default: false
+
+jobs:
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run lint
+
+  format-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm run format:check
+
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: npm ci
+      - run: npm audit --audit-level=high
+
+  test:
+    runs-on: ubuntu-latest
+    needs: [lint, format-check, security-audit]
+    strategy:
+      matrix:
+        node: [16, 18, 20]
+    container:
+      image: node:${{ matrix.node }}
+      options: --cpus 2 --memory 4g
+      volumes:
+        - node_modules:/app/node_modules
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm test -- --coverage
+      - uses: codecov/codecov-action@v4
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_USER: user
+          POSTGRES_PASSWORD: pass
+          POSTGRES_DB: app_db
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+      redis:
+        image: redis:7
+        ports: [6379:6379]
+
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker-compose up -d
+      - run: npm run integration-test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: integration-test
+    steps:
+      - uses: actions/checkout@v4
+      - run: npm ci
+      - run: npm run build
+      - name: Archive production artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: dist/
+
+  deploy:
+    runs-on: self-hosted
+    needs: build
+    if: ${{ always() && github.event_name == 'workflow_dispatch' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy App
+        uses: ./.github/actions/custom-deploy
+        with:
+          environment: ${{ github.event.inputs.environment }}
+          version: ${{ github.event.inputs.version }}
+          notify-team: ${{ github.event.inputs.notify-team }}
+
+  notify:
+    runs-on: ubuntu-latest
+    needs: [deploy]
+    if: always()
+    steps:
+      - name: Notify Slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          payload: |
+            {
+              "text": "Deployment finished for ${{ github.event.inputs.environment }} - status: ${{ job.status }}"
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
