@@ -154,17 +154,20 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Notify via GitHub Issue
-        uses: peter-evans/create-issue-from-file@v5
+        uses: peter-evans/create-issue@v6
         with:
           title: |
             [CI/CD] Deployment ${{ github.event.inputs.environment || 'N/A' }} finished: ${{ job.status }}
-          content: |
+          body: |
             Deployment Result  
             Environment: ${{ github.event.inputs.environment || 'N/A' }}  
             Version: ${{ github.event.inputs.version || 'N/A' }}  
             Status: ${{ job.status }}  
             Run URL: [Run logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})  
             This issue was created automatically by GitHub Actions.
+          labels: |
+            ci-cd
+            automated
 
 permissions:
   contents: read
