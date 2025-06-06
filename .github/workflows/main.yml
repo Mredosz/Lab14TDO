@@ -154,7 +154,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Notify via GitHub Issue
-        uses: peter-evans/create-issue@v6
+        uses: peter-evans/create-issue@v5
         with:
           title: |
             [CI/CD] Deployment ${{ github.event.inputs.environment || 'N/A' }} finished: ${{ job.status }}
