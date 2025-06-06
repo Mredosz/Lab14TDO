@@ -28,6 +28,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+      - run: rm -rf node_modules package-lock.json # clean before install
       - run: npm ci
       - run: npm run lint
 
@@ -38,6 +39,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+      - run: rm -rf node_modules package-lock.json
       - run: npm ci
       - run: npm run format:check
 
@@ -48,6 +50,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
+      - run: rm -rf node_modules package-lock.json
       - run: npm ci
       - run: npm audit --audit-level=high
 
@@ -62,6 +65,7 @@ jobs:
       options: --cpus 2 --memory 4g
     steps:
       - uses: actions/checkout@v4
+      - run: rm -rf node_modules package-lock.json
       - run: npm ci
       - run: npm test -- --coverage
       - uses: codecov/codecov-action@v5
@@ -92,7 +96,10 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-      - run: docker compose up -d
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: rm -rf node_modules package-lock.json
       - run: npm ci
       - run: npm run integration-test
 
@@ -101,6 +108,10 @@ jobs:
     needs: integration-test
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+      - run: rm -rf node_modules package-lock.json
       - run: npm ci
       - run: npm run build
       - name: Archive production artifacts
