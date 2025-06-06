@@ -101,7 +101,7 @@ jobs:
         with:
           node-version: 18
       - run: npm ci
-      - run: docker-compose up -d
+      - run: docker compose up -d
       - run: curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
       - run: chmod +x wait-for-it.sh
       - run: ./wait-for-it.sh localhost:5432 --timeout=30 --strict
