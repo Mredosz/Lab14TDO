@@ -9,5 +9,5 @@ export default {
       },
     ],
   ],
-  testMatch: ["**/integration-test.js"],
+  testMatch: ["**/integration-test.js", "**/__tests__/**/*.test.js"],
 };
