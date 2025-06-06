@@ -86,7 +86,7 @@ jobs:
 
   integration-test:
     runs-on: ubuntu-latest
-    needs: [lint, format-check, security-audit]
+    needs: test
     services:
       postgres:
         image: postgres:15
